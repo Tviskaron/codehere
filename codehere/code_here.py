@@ -61,6 +61,7 @@ class FileRender:
         return [index for index, line in enumerate(lines) if cls.is_sep(line)]
 
     def render_text_block(self, lines, begin_rep="#" * 6 + " Your code here " + "#" * 10, end_rep="##" + "#" * 30):
+        # TODO fix encodings
         lines = deepcopy(lines)
 
         rev_sep_indexes = list(reversed(self.get_separators_indexes(lines)))
