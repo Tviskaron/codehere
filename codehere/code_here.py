@@ -75,10 +75,12 @@ class FileRender:
         return lines
 
 
-def get_out_file_name(file):
-    # todo rewrite with proper settings
-    # return "out.py"
-    return file.split(".")[0] + "(task)." + file.split(".")[1]
+def get_out_file_name(args):
+    if args.outfile:
+        return args.outfile
+    else:
+        filename, extension = args.file
+        return filename + "(task)." + extension
 
 
 def main():
@@ -89,13 +91,16 @@ def main():
                                         raise NotImplementedError code inside. 
                                      """.format(FileRender.get_begin_sep(), FileRender.get_end_sep()))
     parser.add_argument('file', type=str, help='path to input file')
+    parser.add_argument('--outfile', type=str, help='path to output file')
+    parser.add_argument('--clear', action='store_true', help='clear code cells outputs')
+
     args = parser.parse_args()
 
     if args.file.endswith(".py"):
         with open(args.file, "r") as in_:
             lines = in_.readlines()
             rendered_block = FileRender().render_text_block(lines)
-            with open(get_out_file_name(args.file), "w") as out:
+            with open(get_out_file_name(args), "w") as out:
                 out.writelines(rendered_block)
 
     elif args.file.endswith(".ipynb"):
@@ -106,7 +111,10 @@ def main():
             for cell in cells:
                 if cell['cell_type'] == 'code':
                     cell['source'] = FileRender().render_text_block(cell['source'])
-            with open(get_out_file_name(args.file), "w") as out:
+                    if args.clear:
+                        cell["outputs"] = []
+
+            with open(get_out_file_name(args), "w") as out:
                 json.dump(notebook_text, out)
     else:
         parser.error("Unrecognized extension of " + args.file)
