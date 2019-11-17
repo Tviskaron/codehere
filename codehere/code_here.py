@@ -78,7 +78,7 @@ class FileRender:
 def get_out_file_name(file):
     # todo rewrite with proper settings
     # return "out.py"
-    return file
+    return file.split(".")[0] + "(task)." + file.split(".")[1]
 
 
 def main():
@@ -99,7 +99,15 @@ def main():
                 out.writelines(rendered_block)
 
     elif args.file.endswith(".ipynb"):
-        pass
+        with open(args.file, "r") as in_:
+            notebook_text = json.load(in_)
+            cells = notebook_text['cells']
+
+            for cell in cells:
+                if cell['cell_type'] == 'code':
+                    cell['source'] = FileRender().render_text_block(cell['source'])
+            with open(get_out_file_name(args.file), "w") as out:
+                json.dump(notebook_text, out)
     else:
         parser.error("Unrecognized extension of " + args.file)
 
