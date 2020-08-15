@@ -1,8 +1,8 @@
-# codehere
-Tools to prepare notebooks and python files for students tasks and homeworks
+# Codehere
+Codehere is a tool to prepare your jupyter notebooks for seminars and homework.
 
 # installing 
 
 ```
-sudo python3 setup.py install
+pip install git+https://github.com/Tviskaron/codehere.git
 ```
