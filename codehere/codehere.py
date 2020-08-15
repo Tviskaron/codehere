@@ -1,14 +1,18 @@
 # !/usr/bin/env python3
+import argparse
+import json
 import os
 import pathlib
 import re
-import json
-import argparse
+from argparse import Namespace
 from collections import deque
 from copy import deepcopy
-from argparse import Namespace
 from re import Match
 from typing import List, Optional
+from urllib.request import urlopen
+
+import ipykernel
+from notebook import notebookapp
 
 
 class TagError(Exception):
@@ -192,11 +196,39 @@ def process_notebook(args):
             json.dump(notebook_text, out, ensure_ascii=False)
 
 
+def notebook_path():
+    """
+    From:
+    https://stackoverflow.com/questions/12544056/how-do-i-get-the-current-ipython-jupyter-notebook-name/52187331#52187331
+    Returns the absolute path of the Notebook or None if it cannot be determined
+    NOTE: works only when the security is token-based or there is also no password
+    """
+    connection_file = os.path.basename(ipykernel.get_connection_file())
+    kernel_id = connection_file.split('-', 1)[1].split('.')[0]
+
+    for srv in notebookapp.list_running_servers():
+        try:
+            if srv['token'] == '' and not srv['password']:  # No token and no password, ahem...
+                req = urlopen(srv['url'] + 'api/sessions')
+            else:
+                req = urlopen(srv['url'] + 'api/sessions?token=' + srv['token'])
+            sessions = json.load(req)
+            for sess in sessions:
+                if sess['kernel']['id'] == kernel_id:
+                    return os.path.join(srv['notebook_dir'], sess['notebook']['path'])
+        except:
+            pass  # There may be stale entries in the runtime directory
+    return None
+
+
 def process(args: Optional[Namespace] = None) -> None:
     if args is None:
         args = parse_arguments()
     if args.file is None:
-        args.file = str(pathlib.Path(__file__).absolute())
+        nb_path = notebook_path()
+        if nb_path:
+            args.file = nb_path
+
     if args.outfile is None:
         args.outfile = get_outfile_name(args)
 
@@ -208,6 +240,7 @@ def process(args: Optional[Namespace] = None) -> None:
         raise UnsupportedExtensionError("File with unrecognized extension: " + args.file + " \n" +
                                         'Codehere supports only "*.ipynb" and "*.py" files.')
     print("Saved in: ", args.outfile)
+
 
 def convert(file: Optional[str] = None, outfile: Optional[str] = None, solution: bool = False, clear: bool = False,
             replacement=" Your code here ") -> None:
