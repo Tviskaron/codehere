@@ -228,7 +228,8 @@ def process(args: Optional[Namespace] = None) -> None:
         nb_path = notebook_path()
         if nb_path:
             args.file = nb_path
-
+        else:
+            raise FileNotFoundError("Cannot determine input file location. Please specify it directly.")
     if args.outfile is None:
         args.outfile = get_outfile_name(args)
 
