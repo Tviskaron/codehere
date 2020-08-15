@@ -1,5 +1,6 @@
 # !/usr/bin/env python3
 import os
+import pathlib
 import re
 import json
 import argparse
@@ -194,6 +195,8 @@ def process_notebook(args):
 def process(args: Optional[Namespace] = None) -> None:
     if args is None:
         args = parse_arguments()
+    if args.file is None:
+        args.file = str(pathlib.Path(__file__).absolute())
     if args.outfile is None:
         args.outfile = get_outfile_name(args)
 
@@ -206,7 +209,7 @@ def process(args: Optional[Namespace] = None) -> None:
                                         'Codehere supports only "*.ipynb" and "*.py" files.')
 
 
-def convert(file: str, outfile: Optional[str] = None, solution: bool = False, clear: bool = False,
+def convert(file: Optional[str] = None, outfile: Optional[str] = None, solution: bool = False, clear: bool = False,
             replacement=" Your code here ") -> None:
     process(Namespace(**{
         "file": file,
