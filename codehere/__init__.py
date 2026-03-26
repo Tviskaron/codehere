@@ -1,6 +1,6 @@
 """Codehere — prepare annotated code for teaching."""
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 from codehere.converter import Converter
 from codehere.exceptions import (
@@ -28,7 +28,22 @@ def _detect_notebook_path() -> str | None:
     except Exception:
         pass
 
-    # Jupyter / Colab: try matching kernel connection file to running server sessions
+    # Google Colab: fetch notebook content via internal API and save to a temp file
+    try:
+        from google.colab import _message
+        import json as _json
+        import tempfile
+
+        response = _message.blocking_request("get_ipynb", timeout_sec=10)
+        if response and "ipynb" in response:
+            tmp = tempfile.NamedTemporaryFile(suffix=".ipynb", delete=False, mode="w")
+            _json.dump(response["ipynb"], tmp)
+            tmp.close()
+            return tmp.name
+    except Exception:
+        pass
+
+    # Jupyter: try matching kernel connection file to running server sessions
     try:
         import ipykernel
         import json as _json
@@ -57,7 +72,7 @@ def _detect_notebook_path() -> str | None:
     except Exception:
         pass
 
-    # Fallback: single .ipynb in current directory (common in Colab)
+    # Fallback: single .ipynb in current directory
     notebooks = list(Path.cwd().glob("*.ipynb"))
     if len(notebooks) == 1:
         return str(notebooks[0])

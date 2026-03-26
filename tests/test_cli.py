@@ -10,7 +10,7 @@ class TestBuildParser:
             parser.parse_args(["--version"])
         assert exc_info.value.code == 0
         captured = capsys.readouterr()
-        assert "0.2.0" in captured.out
+        assert "0.2.1" in captured.out
 
     def test_replacement_is_string(self):
         parser = build_parser()
