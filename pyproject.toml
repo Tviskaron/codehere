@@ -32,6 +32,7 @@ dev = [
 [tool.ruff]
 target-version = "py310"
 line-length = 120
+extend-exclude = ["*.ipynb"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

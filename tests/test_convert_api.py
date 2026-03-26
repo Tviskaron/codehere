@@ -9,7 +9,8 @@ class TestConvertAPI:
 
         assert callable(convert_fn)
 
-    def test_no_file_raises(self):
+    def test_no_file_raises(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)  # empty dir, no .ipynb to auto-detect
         with pytest.raises(FileNotFoundError):
             convert()
 
