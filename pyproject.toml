@@ -1,6 +1,6 @@
 [project]
 name = "codehere"
-version = "0.2.0"
+version = "0.2.1"
 description = "Prepare Jupyter notebooks, Python files, and Markdown for seminars and homework"
 authors = [{name = "Alexey Skrynnik", email = "skrynnikalexey@gmail.com"}]
 readme = "README.md"
